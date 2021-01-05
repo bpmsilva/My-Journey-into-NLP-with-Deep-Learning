@@ -4,7 +4,6 @@ Original Author: Sean Robertson (https://github.com/spro)
 Modified by: Bernardo Silva (https://github.com/bpmsilva)
 """
 import time
-import math
 import random
 
 import torch
@@ -15,7 +14,6 @@ def time_since(since):
     """Compute elapsed time from a starting period
 
     Args:
-        TODO: check this documentation
         since (float): start timestamp
 
     Returns:
@@ -23,9 +21,9 @@ def time_since(since):
     """
     now = time.time()
     seconds = now - since
-    minutes = math.floor(seconds / 60)
+    minutes = seconds // 60
     seconds -= minutes * 60
-    return f'{minutes:02d}:{seconds:02d}'
+    return f'{int(minutes):02d}:{int(seconds):02d}'
 
 def random_choice(examples):
     """Randomly choose an element from a list
