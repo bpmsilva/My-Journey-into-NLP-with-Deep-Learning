@@ -65,7 +65,7 @@ def letter2tensor(letter):
         letter (str): single-character string
 
     Returns:
-        torch.Tensor: one-hot vector representation of the given letter
+        torch.tensor: one-hot vector representation of the given letter
     """
     tensor = torch.zeros(1, len(ALL_LETTERS))
     tensor[0][letter2idx(letter)] = 1
@@ -79,7 +79,7 @@ def line2tensor(line):
         line (str): input line
 
     Returns:
-        torch.Tensor: a one-hot vector of shape (len(line), 1, len(ALL_LETTERS))
+        torch.tensor: a one-hot vector of shape (len(line), 1, len(ALL_LETTERS))
     """
     tensor = torch.zeros(len(line), 1, len(ALL_LETTERS))
     for idx, letter in enumerate(line):
@@ -91,7 +91,7 @@ def category_from_output(output, all_categories):
     """Return category name and category index for a RNN output
 
     Args:
-        output (torch.Tensor): RNN output
+        output (torch.tensor): RNN output
         all_categories (list of str): list of all categories names
 
     Returns:
