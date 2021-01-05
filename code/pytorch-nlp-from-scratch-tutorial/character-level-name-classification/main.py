@@ -6,6 +6,7 @@ Modified by: Bernardo Silva (https://github.com/bpmsilva)
 import os
 import time
 import glob
+import string
 import argparse
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
@@ -14,7 +15,7 @@ import torch
 import torch.nn as nn
 
 from models.rnn import RNN
-from utils.preprocessing import num_letters, read_lines, category_from_output
+from utils.preprocessing import read_lines, category_from_output
 from utils.train import time_since, random_training_example, train_step, single_prediction
 
 def parse_args():
@@ -56,13 +57,17 @@ def main():
     # get arguments
     args = parse_args()
 
+    # constants
+    all_letters = string.ascii_letters + " .,;'"
+    num_letters = len(all_letters)
+
     # Iterate through all data files and build a category list and a line dictionary
     all_categories, category_lines = [], {}
     for filepath in glob.glob('./data/names/*.txt'):
         filename = os.path.basename(filepath)
         category = os.path.splitext(filename)[0]
         all_categories.append(category)
-        lines = read_lines(filepath)
+        lines = read_lines(filepath, all_letters)
         category_lines[category] = lines
 
     # small log
@@ -70,12 +75,12 @@ def main():
     print(f'There are {num_categories} categories')
     for i in range(10):
         category, line, category_tensor, line_tensor = \
-                random_training_example(all_categories, category_lines)
+                random_training_example(all_categories, category_lines, all_letters)
         print('category =', category, '/ line =', line)
 
     # instantiate the criterion and the RNN model
     criterion = nn.NLLLoss()
-    rnn = RNN(num_letters(), args.size_hidden, num_categories)
+    rnn = RNN(num_letters, args.size_hidden, num_categories)
 
     # train the RNN, keeping track of the losses and the elapsed time
     all_losses = []
@@ -83,7 +88,7 @@ def main():
     start_time = time.time()
     for step in range(1, args.num_iters + 1):
         category, line, category_tensor, line_tensor = \
-                random_training_example(all_categories, category_lines)
+                random_training_example(all_categories, category_lines, all_letters)
         output, loss = train_step(rnn, category_tensor, line_tensor, args.learning_rate, criterion)
         current_loss += loss
 
@@ -101,7 +106,7 @@ def main():
     confusion_matrix = torch.zeros(num_categories, num_categories)
     for i in range(args.num_confusion):
         category, line, category_tensor, line_tensor = \
-                random_training_example(all_categories, category_lines)
+                random_training_example(all_categories, category_lines, all_letters)
         output = single_prediction(line_tensor, rnn)
         pred, pred_idx = category_from_output(output, all_categories)
         category_idx = all_categories.index(category)

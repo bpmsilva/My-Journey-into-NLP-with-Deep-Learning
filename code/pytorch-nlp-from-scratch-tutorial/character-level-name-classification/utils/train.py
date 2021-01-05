@@ -36,12 +36,13 @@ def random_choice(examples):
     """
     return examples[random.randint(0, len(examples) - 1)]
 
-def random_training_example(all_categories, category_lines):
+def random_training_example(all_categories, category_lines, all_letters):
     """Generate a random training example
 
     Args:
         all_categories (list of str): list of the category names
         category_lines (list of str): lines of each category
+        all_letters (str): string containing all valid letters
 
     Returns:
         (str, str, torch.tensor, torch.tensor): category name, line and their corresponding tensors
@@ -50,7 +51,7 @@ def random_training_example(all_categories, category_lines):
     category_tensor = torch.tensor([all_categories.index(category)], dtype=torch.long)
 
     line = random_choice(category_lines[category])
-    line_tensor = line2tensor(line)
+    line_tensor = line2tensor(line, all_letters)
 
     return category, line, category_tensor, line_tensor
 
