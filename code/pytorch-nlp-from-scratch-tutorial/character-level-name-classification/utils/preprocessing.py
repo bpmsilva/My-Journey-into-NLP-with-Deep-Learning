@@ -64,21 +64,66 @@ def letter2tensor(letter, all_letters):
 
     return tensor
 
-def line2tensor(line, all_letters):
-    """Convert a line into a one-hot vector of shape (len(line), 1, len(all_letters))
+def line2tensor(line, all_letters, num_letters=None):
+    """Convert a line into a one-hot vector of shape (len(line), 1, num_letters)
 
     Args:
         line (str): input line
         all_letters (str): string containing all valid letters
+        num_letters (int): number of letters (it can be different from
+                           len(all_letters) due to special tokens)
 
     Returns:
-        torch.tensor: a one-hot vector of shape (len(line), 1, len(all_letters))
+        torch.tensor: a one-hot vector of shape (len(line), 1, num_letters)
     """
-    tensor = torch.zeros(len(line), 1, len(all_letters))
+    if num_letters is None:
+        tensor = torch.zeros(len(line), 1, len(all_letters))
+    else:
+        tensor = torch.zeros(len(line), 1, num_letters)
     for idx, letter in enumerate(line):
         tensor[idx][0][letter2idx(letter, all_letters)] = 1
 
     return tensor
+
+def category2tensor(category, all_categories):
+    """Convert a category to its one-hot vector representation tensor
+
+    Args:
+        category (str): category name
+        all_categories (list): list of all category names
+        num_letters (int): number of letters (it can be different from
+                           len(all_letters) due to special tokens)
+
+    Returns:
+        torch.tensor: one-hot vector representation of the given category
+    """
+    cat_idx = all_categories.index(category)
+    tensor = torch.zeros(1, len(all_categories))
+    tensor[0][cat_idx] = 1
+
+    return tensor
+
+def target2tensor(line, all_letters, num_letters=None):
+    """Create target tensor for a given line
+
+    Args:
+        line (str): sequence of letters
+        all_letters (str): string of all valid letters
+        num_letters (int): number of letters (it can be different from
+                           len(all_letters) due to special tokens)
+
+    Returns:
+        torch.LongTensor: tensor of target letter indices
+    """
+    # remove first letter
+    letter_indices = [all_letters.find(letter) for letter in line[1:]]
+    # add end of sentence token
+    if num_letters is None:
+        letter_indices.append(len(all_letters) - 1)
+    else:
+        letter_indices.append(num_letters - 1)
+
+    return torch.LongTensor(letter_indices)
 
 def category_from_output(output, all_categories):
     """Return category name and category index for a RNN output
