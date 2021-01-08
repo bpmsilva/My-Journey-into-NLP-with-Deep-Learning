@@ -355,14 +355,13 @@ def show_plot(points):
     Args:
         points (list of float): list of points to be plotted
     """
-    plt.switch_backend('agg')
-
     plt.figure()
     _, ax = plt.subplots()
     # this locator puts ticks as regular intervals
     loc = ticker.MultipleLocator(base=0.2)
     ax.yaxis.set_major_locator(loc)
     plt.plot(points)
+    plt.show()
 
 def evaluate(encoder, decoder, sentence, input_lang, output_lang, max_length, device):
     """Evaluate the trained RNN with a given sentence
@@ -386,17 +385,17 @@ def evaluate(encoder, decoder, sentence, input_lang, output_lang, max_length, de
         input_tensor = tensor_from_sentence(input_lang, sentence, device)
         input_length = input_tensor.size(0)
         encoder_hidden = encoder.init_hidden(device)
-        encoder_outputs = torch.zeros(max_length, encoder.hidden_size, device)
+        encoder_outputs = torch.zeros((max_length, encoder.hidden_size), device=device)
 
         for ei in range(input_length):
             encoder_output, encoder_hidden = encoder(input_tensor[ei], encoder_hidden)
             encoder_outputs[ei] += encoder_output[0, 0]
 
-        decoder_input = torch.tensor([[input_lang.SOS_token]], device) # SOS
+        decoder_input = torch.tensor([[input_lang.SOS_token]], device=device) # SOS
         decoder_hidden = encoder_hidden
 
         decoded_words = []
-        decoder_attentions = torch.zeros(max_length, max_length)
+        decoder_attentions = torch.zeros((max_length, max_length), device=device)
         for di in range(max_length):
             decoder_output, decoder_hidden, decoder_attention = \
                 decoder(decoder_input, decoder_hidden, encoder_outputs)
@@ -435,3 +434,53 @@ def evaluate_randomly(encoder, decoder, pairs, input_lang, output_lang, max_leng
         output_sentence = ' '.join(output_words)
         print('<', output_sentence)
         print()
+
+def show_attention(input_sentence, output_words, attentions):
+    """Plot the attention weights of the input and output words
+
+    Args:
+        input_sentence (str): sentence that was translated
+        output_words (list of str): list of tokens of the translated sentence
+        attentions (torch.Tensor): attention weights
+    """
+    # set up figure with colors bar
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    cax = ax.matshow(attentions.cpu().numpy(), cmap='bone')
+    fig.colorbar(cax)
+
+    # set up axes
+    ax.set_xticklabels([''] + input_sentence.split(' ') + ['EOS'], rotation=90)
+    ax.set_yticklabels([''] + output_words)
+
+    # show label at every tick
+    ax.xaxis.set_major_locator(ticker.MultipleLocator(1))
+    ax.yaxis.set_major_locator(ticker.MultipleLocator(1))
+
+    plt.show()
+
+def evaluate_and_show_attention(
+    encoder,
+    decoder,
+    input_sentence,
+    input_lang,
+    output_lang,
+    max_length,
+    device
+):
+    """Evaluate translation and show attention weights
+
+    Args:
+        encoder (EncoderRNN): encoder of the model
+        decoder (AttentionDecoderRNN): decoder of the model
+        input_sentence (str): sentence going to be translated
+        input_lang (Lang): language to translate from
+        output_lang (Lang): language to translate to
+        max_length (int): maximum length of the sentence pair
+        device (str): device for the evaluation (e.g. 'cpu')
+    """
+    output_words, attentions = \
+            evaluate(encoder, decoder, input_sentence, input_lang, output_lang, max_length, device)
+    print('input =', input_sentence)
+    print('output =', ' '.join(output_words))
+    show_attention(input_sentence, output_words, attentions)
