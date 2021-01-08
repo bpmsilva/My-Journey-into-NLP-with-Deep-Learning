@@ -10,7 +10,7 @@ def main():
     """
     Main function for the translation RNN
     """
-    device = 'gpu'
+    device = 'cuda'
     dropout = 0.1
     max_length = 10
     num_iters = 75000
@@ -47,6 +47,7 @@ def main():
         input_lang,
         output_lang,
         num_iters,
+        device=device,
         print_every=print_every,
         teacher_forcing_ratio=teacher_forcing_ratio)
 

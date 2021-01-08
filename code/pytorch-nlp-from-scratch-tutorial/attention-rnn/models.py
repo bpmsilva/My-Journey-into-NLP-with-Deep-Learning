@@ -27,7 +27,7 @@ class EncoderRNN(nn.Module):
         output_tensor, hidden_tensor = self.gru(embedded_tensor, hidden_tensor)
         return output_tensor, hidden_tensor
 
-    def init_hidden(self, device='cpu'):
+    def init_hidden(self, device):
         """
         Init the hidden state of the RNN
         """
@@ -100,7 +100,7 @@ class AttentionDecoderRNN(nn.Module):
 
         return output_tensor, hidden_tensor, attention_weights
 
-    def init_hidden(self, device='cpu'):
+    def init_hidden(self, device):
         """
         Init the hidden state of the RNN
         """

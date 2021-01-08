@@ -206,7 +206,7 @@ def train_step(
     Returns:
         [type]: [description]
     """
-    encoder_hidden = encoder.init_hidden()
+    encoder_hidden = encoder.init_hidden(device)
 
     encoder.train()
     decoder.train()
@@ -339,8 +339,8 @@ def train_iters(
         if step % print_every == 0:
             print_loss_avg = print_loss_total / print_every
             print_loss_total = 0
-            print(f'{time_since(start, step/num_iters)} ({step}' \
-                  f'{step*100/num_iters}%) {print_loss_avg:.4f}')
+            print(f'{time_since(start, step/num_iters)} ({step} ' \
+                  f'{step*100/num_iters:.2f}%) {print_loss_avg:.4f}')
 
         if step % plot_every == 0:
             plot_loss_avg = plot_loss_total / plot_every
@@ -385,7 +385,7 @@ def evaluate(encoder, decoder, sentence, input_lang, output_lang, max_length, de
 
         input_tensor = tensor_from_sentence(input_lang, sentence, device)
         input_length = input_tensor.size(0)
-        encoder_hidden = encoder.init_hidden()
+        encoder_hidden = encoder.init_hidden(device)
         encoder_outputs = torch.zeros(max_length, encoder.hidden_size, device)
 
         for ei in range(input_length):
