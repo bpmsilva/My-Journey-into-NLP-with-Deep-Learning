@@ -53,7 +53,7 @@ class DecoderRNN(nn.Module):
         output_tensor = self.embedding(input_tensor).view(1, 1, -1)
         output_tensor = F.relu(output_tensor)
         output_tensor, hidden_tensor = self.gru(output_tensor, hidden_tensor)
-        output_tensor = self.softmax(self.out(output_tensor[0]))
+        output_tensor = self.softmax(self.out(output_tensor[0]), dim=1)
 
         return output_tensor, hidden_tensor
 
@@ -83,8 +83,7 @@ class AttentionDecoderRNN(nn.Module):
         embedded = self.dropout(embedded)
 
         attention_weights = F.softmax(
-            self.attention(torch.cat((embedded[0], hidden_tensor[0]), dim=1))
-        )
+            self.attention(torch.cat((embedded[0], hidden_tensor[0]), dim=1)), dim=1)
         attention_applied = torch.bmm(
             attention_weights.unsqueeze(0),
             encoder_outputs.unsqueeze(0)
