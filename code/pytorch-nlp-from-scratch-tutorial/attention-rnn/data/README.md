@@ -1,4 +1,4 @@
-# Name Dataset
+# Translation Pairs Dataset
 
 This dataset was originally downloaded from https://download.pytorch.org/tutorial/data.zip.
 There are "many thousands of English to French translation pairs".
